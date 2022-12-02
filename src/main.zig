@@ -9,6 +9,7 @@ pub fn main() anyerror!void {
     }
     const alloc = gpa.allocator();
 
+    // Command line arguments, skipping the executable name
     var argIt = std.process.args();
     const exeName = argIt.next(alloc);
     if (exeName != null) alloc.free(try exeName.?);
@@ -23,19 +24,28 @@ pub fn main() anyerror!void {
     defer inputFileName.deinit();
     try std.fmt.format(inputFileName.writer(), "day{s}Input", .{whichDay});
 
-    const inpF = try std.fs.cwd().openFile(
+    const inpF = std.fs.cwd().openFile(
         inputFileName.items,
         .{.read = true}
-    );
+    ) catch {
+        std.log.err(
+            "Attempted input file name appears to be wrong: `{s}` It might be missing or misspelled", 
+            .{inputFileName.items}
+        );
+        return;
+    };
     defer inpF.close();
 
-    const runtime = RT{
+    var runtime = RT{
         .alloc = gpa.allocator(),
         .input = inpF.reader(),
         .output = std.io.getStdOut().writer(),
         .err = std.io.getStdErr().writer(),
     };
+    defer runtime.deinit();
 
+    // Figure out which function to call based on command line argument.
+    // Could probably be a macro but I'm lazy
     try std.ComptimeStringMap(fn (RT) anyerror!void, .{
         .{ "1", @import("./day1.zig").solution },
     }).get(whichDay).?(runtime);
