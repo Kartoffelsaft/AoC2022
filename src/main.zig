@@ -48,6 +48,8 @@ pub fn main() anyerror!void {
     // Could probably be a macro but I'm lazy
     try std.ComptimeStringMap(fn (RT) anyerror!void, .{
         .{ "1", @import("./day1.zig").solution },
+        .{ "2", @import("./day2.zig").solution },
+        .{ "3", @import("./day3.zig").solution },
     }).get(whichDay).?(runtime);
 }
 
