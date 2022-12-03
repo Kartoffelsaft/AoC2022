@@ -1,6 +1,16 @@
 const std = @import("std");
 const RT = @import("./universal.zig").Runtime;
 
+fn Set(comptime T: type) type { return std.hash_map.AutoHashMap(T, void); }
+
+fn setFromSlice(rt: RT, what: []u8) !Set(u8) {
+    var ret = Set(u8).init(rt.alloc);
+
+    for (what) |val| { try ret.put(val, {}); }
+
+    return ret;
+}
+
 pub fn solution(rt: RT) anyerror!void {
     var totalPriority: i32 = 0;
 
@@ -9,17 +19,10 @@ pub fn solution(rt: RT) anyerror!void {
     ) |line| {
         defer rt.alloc.free(line);
 
-        var sectionASet = std.hash_map.AutoHashMap(u8, void).init(rt.alloc);
-        var sectionBSet = std.hash_map.AutoHashMap(u8, void).init(rt.alloc);
+        var sectionASet = try setFromSlice(rt, line[0 .. line.len/2]);
+        var sectionBSet = try setFromSlice(rt, line[line.len/2 .. line.len]);
         defer sectionASet.deinit();
         defer sectionBSet.deinit();
-
-        for (line[0 .. line.len/2]) |item| {
-            try sectionASet.put(item, {});
-        }
-        for (line[line.len/2 .. line.len]) |item| {
-            try sectionBSet.put(item, {});
-        }
 
         var common: u8 = 0;
         var iterA = sectionASet.keyIterator();
