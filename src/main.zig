@@ -51,6 +51,7 @@ pub fn main() anyerror!void {
         .{ "2", @import("./day2.zig").solution },
         .{ "3", @import("./day3.zig").solution },
         .{ "4", @import("./day4.zig").solution },
+        .{ "5", @import("./day5.zig").solution },
     }).get(whichDay).?(runtime);
 }
 
