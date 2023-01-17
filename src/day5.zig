@@ -16,8 +16,34 @@ pub fn solution(rt: RT) anyerror!void {
         rt.alloc.free(stacks); 
     }
 
+    try rt.input.skipUntilDelimiterOrEof('\n');
+
+    while (try getStackCommand(rt)) |cmd| {
+        var fromStack = &stacks[cmd.from - 1];
+        var toStack = &stacks[cmd.to - 1];
+
+        try rt.output.print("{d}x {d} -> {d}\n", .{cmd.amount, cmd.from, cmd.to});
+        for (stacks) |stk| {
+            try rt.output.print("]{s}\n", .{stk.items});
+        }
+        try rt.output.writeByte('\n');
+
+        try toStack.*.appendSlice(fromStack.*.items[fromStack.*.items.len - cmd.amount ..]);
+        try fromStack.*.resize(fromStack.*.items.len - cmd.amount);
+    }
+
     for (stacks) |stk| {
         try rt.output.print("{s}\n", .{stk.items});
+    }
+}
+
+pub fn solutionP1(rt: RT) anyerror!void {
+    var stacks = try getStacks(rt);
+    defer { 
+        for (stacks) |stack| {
+            stack.deinit();
+        } 
+        rt.alloc.free(stacks); 
     }
 
     try rt.input.skipUntilDelimiterOrEof('\n');
